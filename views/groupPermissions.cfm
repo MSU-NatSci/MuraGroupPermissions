@@ -2,6 +2,7 @@
     groupID = $.event('groupid');
     groupName = getGroupName(groupID);
     q = getPermissions(groupID);
+    addRestrictedAccess(q, groupName);
     
     function getGroupName(required string groupID) {
         var siteID = session.siteid;
@@ -22,6 +23,32 @@
             FROM tpermissions p, tcontent c
             WHERE p.GroupID = :groupID AND p.SiteID = :siteID AND c.ContentID = p.ContentID AND c.Active = 1 AND c.SiteID = :siteID ORDER BY c.Title",
             { groupID = groupID, siteID = siteID });
+    }
+
+    function addRestrictedAccess(required query q, required string groupName) {
+        var siteID = session.siteid;
+        var q2 = queryExecute(
+            "SELECT c.ContentID, c.SiteID, c.Title, c.ContentHistID, c.ModuleID,
+            ParentTitle = (SELECT Title FROM tcontent WHERE
+            ContentID = c.ParentID AND Active = 1 AND SiteID = :siteID)
+            FROM tcontent c
+            WHERE c.RestrictGroups LIKE :likeName AND Active = 1
+            ORDER BY c.Title",
+            { likeName = "%#groupName#%", siteID = siteID });
+        // let's hope there is no % or [] in the group name
+        // eventually Mura should switch to using IDs
+        // see https://github.com/blueriver/MuraCMS/issues/2627
+        for (row in q2) {
+            queryAddRow(q, {
+                'ContentID' = row.ContentID,
+                'Type' = 'restriction',
+                'SiteID' = row.SiteID,
+                'Title' = row.Title,
+                'ContentHistID' = row.ContentHistID,
+                'ModuleID' = row.ModuleID,
+                'ParentTitle' = row.ParentTitle
+            });
+        }
     }
 </cfscript>
 
@@ -45,8 +72,12 @@
         <tbody>
             <cfloop query="q">
                 <cfset editContentURL = "#$.globalConfig('context')#/admin/?muraAction=cArch.edit&amp;contenthistid=#ContentHistID#&amp;siteid=#SiteID#&amp;contentid=#ContentID#">
-                <cfset permType = (Type eq 'module' ? 'module' : 'main')>
-                <cfset editPermURL = "#$.globalConfig('context')#/admin/?muraAction=cPerm.#permType#&amp;contentid=#ContentID#&amp;siteid=#SiteID#&amp;moduleid=#ModuleID#">
+                <cfif Type eq 'restriction'>
+                    <cfset editPermURL = "#editContentURL###tabPublishing">
+                <cfelse>
+                    <cfset permType = (Type eq 'module' ? 'module' : 'main')>
+                    <cfset editPermURL = "#$.globalConfig('context')#/admin/?muraAction=cPerm.#permType#&amp;contentid=#ContentID#&amp;siteid=#SiteID#&amp;moduleid=#ModuleID#">
+                </cfif>
                 <tr>
                     <td class="actions">
                         <a class="show-actions" href="javascript:;" ontouchstart="this.onclick();" onclick="showTableControls(this);"><i class="mi-ellipsis-v"></i></a>
