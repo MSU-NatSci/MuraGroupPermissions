@@ -5,7 +5,6 @@
     addRestrictedAccess(q, groupName);
     
     function getGroupName(required string groupID) {
-        var siteID = session.siteid;
         var q = queryExecute(
             "SELECT GroupName FROM tusers WHERE UserID = :groupID",
             { groupID = groupID });
@@ -16,25 +15,23 @@
     }
 
     function getPermissions(required string groupID) {
-        var siteID = session.siteid;
         return queryExecute(
             "SELECT p.ContentID, p.Type, p.SiteID, c.Title, c.ContentHistID, c.ModuleID,
-            ParentTitle = (SELECT Title FROM tcontent WHERE ContentID = c.ParentID AND Active = 1 AND SiteID = :siteID)
+            ParentTitle = (SELECT Title FROM tcontent WHERE ContentID = c.ParentID AND Active = 1 AND SiteID = p.SiteID)
             FROM tpermissions p, tcontent c
-            WHERE p.GroupID = :groupID AND p.SiteID = :siteID AND c.ContentID = p.ContentID AND c.Active = 1 AND c.SiteID = :siteID ORDER BY c.Title",
-            { groupID = groupID, siteID = siteID });
+            WHERE p.GroupID = :groupID AND c.SiteID = p.SiteID AND c.ContentID = p.ContentID AND c.Active = 1 ORDER BY c.Title",
+            { groupID = groupID });
     }
 
     function addRestrictedAccess(required query q, required string groupName) {
-        var siteID = session.siteid;
         var q2 = queryExecute(
             "SELECT c.ContentID, c.SiteID, c.Title, c.ContentHistID, c.ModuleID,
             ParentTitle = (SELECT Title FROM tcontent WHERE
-            ContentID = c.ParentID AND Active = 1 AND SiteID = :siteID)
+            ContentID = c.ParentID AND Active = 1)
             FROM tcontent c
             WHERE c.RestrictGroups LIKE :likeName AND Active = 1
             ORDER BY c.Title",
-            { likeName = "%#groupName#%", siteID = siteID });
+            { likeName = "%#groupName#%" });
         // let's hope there is no % or [] in the group name
         // eventually Mura should switch to using IDs
         // see https://github.com/blueriver/MuraCMS/issues/2627
@@ -65,6 +62,7 @@
             <tr>
                 <th class="actions"></th>
                 <th class="var-width">Content Title</th>
+                <th>Site ID</th>
                 <th>Parent</th>
                 <th>Permission</th>
             </tr>
@@ -99,7 +97,8 @@
                         </div>
                     </td>
                     <td class="var-width"><a href="#editPermURL#">#encodeForHTML(Title)#</a></td>
-                    <td><a href="#editPermURL#">#encodeForHTML(ParentTitle)#</a></td>
+                    <td><a href="#editPermURL#">#encodeForHTML(SiteID)#</a></td>
+                    <td><cfif Type neq 'module'><a href="#editPermURL#">#encodeForHTML(ParentTitle)#</a></cfif></td>
                     <td><a href="#editPermURL#">#encodeForHTML(Type)#</a></td>
                 </tr>
             </cfloop>
