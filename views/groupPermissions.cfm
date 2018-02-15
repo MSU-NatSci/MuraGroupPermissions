@@ -17,7 +17,7 @@
     function getPermissions(required string groupID) {
         return queryExecute(
             "SELECT p.ContentID, p.Type, p.SiteID, c.Title, c.ContentHistID, c.ModuleID,
-            ParentTitle = (SELECT Title FROM tcontent WHERE ContentID = c.ParentID AND Active = 1 AND SiteID = p.SiteID)
+            (SELECT Title FROM tcontent WHERE ContentID = c.ParentID AND Active = 1 AND SiteID = p.SiteID) AS ParentTitle
             FROM tpermissions p, tcontent c
             WHERE p.GroupID = :groupID AND c.SiteID = p.SiteID AND c.ContentID = p.ContentID AND c.Active = 1 ORDER BY c.Title",
             { groupID = groupID });
@@ -26,8 +26,8 @@
     function addRestrictedAccess(required query q, required string groupName) {
         var q2 = queryExecute(
             "SELECT c.ContentID, c.SiteID, c.Title, c.ContentHistID, c.ModuleID,
-            ParentTitle = (SELECT Title FROM tcontent WHERE
-            ContentID = c.ParentID AND Active = 1)
+            (SELECT TOP 1 Title FROM tcontent WHERE
+            ContentID = c.ParentID AND Active = 1) AS ParentTitle
             FROM tcontent c
             WHERE c.RestrictGroups LIKE :likeName AND Active = 1
             ORDER BY c.Title",
