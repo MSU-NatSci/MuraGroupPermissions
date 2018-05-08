@@ -16,7 +16,7 @@
 
     function getPermissions(required string groupID) {
         return queryExecute(
-            "SELECT p.ContentID, p.Type, p.SiteID, c.Title, c.ContentHistID, c.ModuleID,
+            "SELECT p.ContentID, p.Type, p.SiteID, c.Title, c.ContentHistID, c.ModuleID, c.Type AS contentType,
             (SELECT Title FROM tcontent WHERE ContentID = c.ParentID AND Active = 1 AND SiteID = p.SiteID) AS ParentTitle
             FROM tpermissions p, tcontent c
             WHERE p.GroupID = :groupID AND c.SiteID = p.SiteID AND c.ContentID = p.ContentID AND c.Active = 1 ORDER BY c.Title",
@@ -86,7 +86,7 @@
                                         <i class="mi-pencil"></i>Edit Permission
                                     </a>
                                 </li>
-                                <cfif Type neq 'module'>
+                                <cfif Type neq 'module' and contentType neq 'Module'>
                                     <li class="edit">
                                         <a href="#editContentURL#">
                                             <i class="mi-pencil"></i>Edit Content
