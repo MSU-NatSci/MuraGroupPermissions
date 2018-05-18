@@ -2,7 +2,7 @@
     groupID = $.event('groupid');
     groupName = getGroupName(groupID);
     q = getPermissions(groupID);
-    addRestrictedAccess(q, groupName);
+    addRestrictedAccess($, q, groupName);
     
     function getGroupName(required string groupID) {
         var q = queryExecute(
@@ -23,11 +23,21 @@
             { groupID = groupID });
     }
 
-    function addRestrictedAccess(required query q, required string groupName) {
+    function addRestrictedAccess(required any $, required query q, required string groupName) {
+        var dbType = $.getConfigBean().getDbType();
+        var subquery = '';
+        if (dbType == 'mssql')
+            subquery = "SELECT TOP 1 Title FROM tcontent WHERE
+            ContentID = c.ParentID AND Active = 1";
+        else if (dbType == "oracle")
+            subquery = "SELECT Title FROM tcontent WHERE
+            ContentID = c.ParentID AND Active = 1 WHERE ROWNUM <= 1";
+        else
+            subquery = "SELECT Title FROM tcontent WHERE
+            ContentID = c.ParentID AND Active = 1 LIMIT 1";
         var q2 = queryExecute(
             "SELECT c.ContentID, c.SiteID, c.Title, c.ContentHistID, c.ModuleID,
-            (SELECT TOP 1 Title FROM tcontent WHERE
-            ContentID = c.ParentID AND Active = 1) AS ParentTitle
+            (#subquery#) AS ParentTitle
             FROM tcontent c
             WHERE c.RestrictGroups LIKE :likeName AND Active = 1
             ORDER BY c.Title",
