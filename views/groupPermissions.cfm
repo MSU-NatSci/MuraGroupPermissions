@@ -79,38 +79,43 @@
         </thead>
         <tbody>
             <cfloop query="q">
-                <cfset editContentURL = "#$.globalConfig('context')#/admin/?muraAction=cArch.edit&amp;contenthistid=#ContentHistID#&amp;siteid=#SiteID#&amp;contentid=#ContentID#">
-                <cfif Type eq 'restriction'>
-                    <cfset editPermURL = "#editContentURL###tabPublishing">
-                <cfelse>
-                    <cfset permType = (Type eq 'module' ? 'module' : 'main')>
-                    <cfset editPermURL = "#$.globalConfig('context')#/admin/?muraAction=cPerm.#permType#&amp;contentid=#ContentID#&amp;siteid=#SiteID#&amp;moduleid=#ModuleID#">
-                </cfif>
-                <tr>
-                    <td class="actions">
-                        <a class="show-actions" href="javascript:;" ontouchstart="this.onclick();" onclick="showTableControls(this);"><i class="mi-ellipsis-v"></i></a>
-                        <div class="actions-menu hide">
-                            <ul class="actions-list">
-                                <li class="edit">
-                                    <a href="#editPermURL#">
-                                        <i class="mi-pencil"></i>Edit Permission
-                                    </a>
-                                </li>
-                                <cfif Type neq 'module' and contentType neq 'Module'>
+                <!--- ignoring some default values for Components, Forms and Home --->
+                <cfif (ContentID neq '00000000000000000000000000000000003' || Type neq 'deny') &&
+                        (ContentID neq '00000000000000000000000000000000004' || Type neq 'deny') &&
+                        (ContentID neq '00000000000000000000000000000000001' || Type neq 'read')>
+                    <cfset editContentURL = "#$.globalConfig('context')#/admin/?muraAction=cArch.edit&amp;contenthistid=#ContentHistID#&amp;siteid=#SiteID#&amp;contentid=#ContentID#">
+                    <cfif Type eq 'restriction'>
+                        <cfset editPermURL = "#editContentURL###tabPublishing">
+                    <cfelse>
+                        <cfset permType = (Type eq 'module' ? 'module' : 'main')>
+                        <cfset editPermURL = "#$.globalConfig('context')#/admin/?muraAction=cPerm.#permType#&amp;contentid=#ContentID#&amp;siteid=#SiteID#&amp;moduleid=#ModuleID#">
+                    </cfif>
+                    <tr>
+                        <td class="actions">
+                            <a class="show-actions" href="javascript:;" ontouchstart="this.onclick();" onclick="showTableControls(this);"><i class="mi-ellipsis-v"></i></a>
+                            <div class="actions-menu hide">
+                                <ul class="actions-list">
                                     <li class="edit">
-                                        <a href="#editContentURL#">
-                                            <i class="mi-pencil"></i>Edit Content
+                                        <a href="#editPermURL#">
+                                            <i class="mi-pencil"></i>Edit Permission
                                         </a>
                                     </li>
-                                </cfif>
-                            </ul>
-                        </div>
-                    </td>
-                    <td class="var-width"><a href="#editPermURL#">#encodeForHTML(Title)#</a></td>
-                    <td><a href="#editPermURL#">#encodeForHTML(SiteID)#</a></td>
-                    <td><cfif Type neq 'module'><a href="#editPermURL#">#encodeForHTML(ParentTitle)#</a></cfif></td>
-                    <td><a href="#editPermURL#">#encodeForHTML(Type)#</a></td>
-                </tr>
+                                    <cfif Type neq 'module' and contentType neq 'Module'>
+                                        <li class="edit">
+                                            <a href="#editContentURL#">
+                                                <i class="mi-pencil"></i>Edit Content
+                                            </a>
+                                        </li>
+                                    </cfif>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="var-width"><a href="#editPermURL#">#encodeForHTML(Title)#</a></td>
+                        <td><a href="#editPermURL#">#encodeForHTML(SiteID)#</a></td>
+                        <td><cfif Type neq 'module'><a href="#editPermURL#">#encodeForHTML(ParentTitle)#</a></cfif></td>
+                        <td><a href="#editPermURL#">#encodeForHTML(Type)#</a></td>
+                    </tr>
+                </cfif>
             </cfloop>
         </tbody>
     </table>
