@@ -1,6 +1,7 @@
 <!--- Main plugin page. All requests are being handled here. --->
 
 <cfscript>
+    include 'plugin/config.cfm';
     import model.websites;
     import model.contacts;
 
@@ -15,4 +16,3 @@
             include 'views/groupList.cfm';
     }
 </cfscript>
-

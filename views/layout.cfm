@@ -1,5 +1,10 @@
 <!--- This template handles the layout for all pages in the plugin --->
 
+<cfif getBaseTemplatePath() eq getCurrentTemplatePath()>
+    Direct execution denied.
+    <cfabort>
+</cfif>
+
 <cfparam name="topButtons" type="string" default=""> <!--- contains HTML --->
 <cfparam name="body" type="string" default=""> <!--- contains HTML --->
 

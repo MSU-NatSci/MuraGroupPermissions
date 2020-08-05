@@ -1,3 +1,8 @@
+<cfif getBaseTemplatePath() eq getCurrentTemplatePath()>
+    Direct execution denied.
+    <cfabort>
+</cfif>
+
 <cfscript>
     groupID = $.event('groupid');
     groupName = getGroupName(groupID);

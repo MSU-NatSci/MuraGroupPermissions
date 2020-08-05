@@ -13,7 +13,6 @@
         <providerURL>#variables.settings.providerURL#</providerURL>
         <category>#variables.settings.category#</category>
         <eventHandlers>
-            <eventHandler event="onApplicationLoad" component="eventHandler" persist="false"/>
         </eventHandlers>
         <mappings />
         <settings />

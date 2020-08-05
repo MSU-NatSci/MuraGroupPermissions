@@ -1,3 +1,8 @@
+<cfif getBaseTemplatePath() eq getCurrentTemplatePath()>
+    Direct execution denied.
+    <cfabort>
+</cfif>
+
 <cfscript>
     include '../plugin/settings.cfm';
 
